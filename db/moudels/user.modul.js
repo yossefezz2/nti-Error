@@ -30,7 +30,12 @@ const userSchema = mongoose.Schema({
 
     },
 
-    address: {
+    address: [{
+        isDefault:{
+            type:Boolean,
+            trim: true,
+            default: false
+        },
         addressType: {
             type: String,
             trim: true,
@@ -45,7 +50,7 @@ const userSchema = mongoose.Schema({
             maxLenght: 20,
             // required: true,
         }
-    },
+}],
     dataB: {
         type: Date
     },
@@ -77,7 +82,7 @@ userSchema.statics.login = async (email, password) => {
     const findEmail = await userModel.findOne({ email })
     if (findEmail) {
         if (await bycrypt.compare(password, findEmail.password)) {
-            return findEmail.toJSON()
+            return findEmail
         } else {
             throw new Error("Invalid password")
         }
@@ -87,7 +92,7 @@ userSchema.statics.login = async (email, password) => {
 }
 userSchema.methods.genTokens = async function () {
     const token = await jwt.sign({_id:this._id},process.env.jwtKey)
-    this.token.push({token})
+    this.tokens.push({token})
     await this.save()
     return token
 }
